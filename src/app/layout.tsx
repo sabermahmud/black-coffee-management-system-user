@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Manrope, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";
-import AdminNavbar from "@/components/(admin)/adminNav/AdminNavbar";
+import AdminNavbar from "@/components/admin/adminNav/AdminNavbar";
 import Navbar from "@/components/header/Navbar";
 
 const manrope = Manrope({

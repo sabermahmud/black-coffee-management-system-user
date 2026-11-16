@@ -2,5 +2,7 @@
 
 export default function LoginPage() {
     
-    return 
+    return <>
+    
+    </>
 }
