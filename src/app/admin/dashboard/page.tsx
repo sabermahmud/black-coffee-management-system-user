@@ -173,7 +173,7 @@ export default function AdminDashboard() {
           </Link>
 
           <Link
-            href="/admin/products/new"
+            href="/admin/inventory/add-product"
             className="inline-flex items-center gap-2 rounded-lg bg-[#111111] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#79543A]"
           >
             <Plus size={17} />
