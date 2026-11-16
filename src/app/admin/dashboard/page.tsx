@@ -356,7 +356,7 @@ export default function AdminDashboard() {
 
           <CardContent className="px-5">
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[650px] text-left text-sm">
+              <table className="w-full min-w-162.5 text-left text-sm">
                 <thead>
                   <tr className="border-b border-[#E7E2DC] text-xs text-[#77736E]">
                     <th className="pb-3 font-medium">Order ID</th>
