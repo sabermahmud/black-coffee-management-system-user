@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import {
   Wallet,
@@ -108,7 +107,12 @@ const orders = [
 const topProducts = [
   { name: "Spanish Latte", category: "Coffee", sold: 320, percentage: 90 },
   { name: "Cappuccino", category: "Coffee", sold: 280, percentage: 78 },
-  { name: "Iced Americano", category: "Cold Coffee", sold: 210, percentage: 62 },
+  {
+    name: "Iced Americano",
+    category: "Cold Coffee",
+    sold: 210,
+    percentage: 62,
+  },
   { name: "Caramel Macchiato", category: "Coffee", sold: 180, percentage: 45 },
 ];
 
@@ -143,7 +147,6 @@ function SectionHeading({
 export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F7F5F1] p-4 sm:p-6 lg:p-8">
-
       {/* Dashboard Header */}
       <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
@@ -232,7 +235,6 @@ export default function AdminDashboard() {
 
       {/* Sales Chart and Quick Summary */}
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-
         {/* Weekly Sales */}
         <Card className="gap-5 border-[#E7E2DC] bg-white py-5 shadow-none xl:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between px-5">
@@ -245,7 +247,10 @@ export default function AdminDashboard() {
               </CardDescription>
             </div>
 
-            <Badge variant="outline" className="border-[#E7E2DC] text-[#79543A]">
+            <Badge
+              variant="outline"
+              className="border-[#E7E2DC] text-[#79543A]"
+            >
               This Week
             </Badge>
           </CardHeader>
@@ -278,9 +283,7 @@ export default function AdminDashboard() {
                     />
                   </div>
 
-                  <span className="text-xs text-[#77736E]">
-                    {item.day}
-                  </span>
+                  <span className="text-xs text-[#77736E]">{item.day}</span>
                 </div>
               ))}
             </div>
@@ -293,9 +296,7 @@ export default function AdminDashboard() {
             <CardTitle className="text-base font-bold text-[#111111]">
               Store Summary
             </CardTitle>
-            <CardDescription>
-              Today's store performance
-            </CardDescription>
+            <CardDescription>Today's store performance</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-5 px-5">
@@ -343,7 +344,6 @@ export default function AdminDashboard() {
 
       {/* Recent Orders and Best Sellers */}
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-
         {/* Recent Orders */}
         <Card className="min-w-0 gap-4 border-[#E7E2DC] bg-white py-5 shadow-none xl:col-span-2">
           <CardHeader className="px-5">
@@ -384,9 +384,7 @@ export default function AdminDashboard() {
                         {order.customer}
                       </td>
 
-                      <td className="py-4 text-[#77736E]">
-                        {order.product}
-                      </td>
+                      <td className="py-4 text-[#77736E]">{order.product}</td>
 
                       <td className="py-4 font-semibold text-[#111111]">
                         {order.amount}
