@@ -3,12 +3,9 @@ import Image from "next/image";
 import {
   Package,
   Layers3,
-  CalendarDays,
-  UserRound,
-  MapPin,
-  Phone,
-  FileText,
+  Boxes,
   MoreHorizontal,
+  Tag,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,16 +16,11 @@ type Product = {
   productName: string;
   category: string;
   imageUrl: string;
-  boxPrice: string;
-  piecePrice: string;
-  packageQuantity: string;
-  pieceQuantity: string;
+  boxPrice: string | number;
+  piecePrice: string | number;
+  packageQuantity: string | number;
+  pieceQuantity: string | number;
   unit: string;
-  supplierName: string;
-  supplierAddress: string;
-  supplierPhone: string;
-  invoiceNumber: string;
-  purchaseDate: string;
 };
 
 export default function ProductCard({
@@ -36,21 +28,57 @@ export default function ProductCard({
 }: {
   product: Product;
 }) {
+  const boxPrice = Number(product.boxPrice) || 0;
+  const piecePrice = Number(product.piecePrice) || 0;
+  const packageQuantity = Number(product.packageQuantity) || 0;
+  const pieceQuantity = Number(product.pieceQuantity) || 0;
+
+  // Calculate total stock pieces
+  const totalPieces = packageQuantity * pieceQuantity;
+
+  // Format currency
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat("en-SA", {
+      style: "currency",
+      currency: "SAR",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(price);
+
+  // Category labels
+  const categoryLabels: Record<string, string> = {
+    coffee: "Coffee & Beans",
+    beverages: "Beverages",
+    dairy: "Dairy Products",
+    bakery: "Bakery & Snacks",
+    sweets: "Sweets",
+    packaging: "Packaging Materials",
+    cups: "Cups & Accessories",
+    others: "Others",
+  };
+
   return (
-    <Card className="group overflow-hidden gap-0 border-[#E7E2DC] bg-white py-0 shadow-none transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#79543A]/5">
+    <Card className="group gap-0 overflow-hidden border-[#E7E2DC] bg-white py-0 shadow-none transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#79543A]/5">
 
       {/* Product Image */}
-      <div className="relative aspect-16/16 overflow-hidden bg-[#F7F5F1]">
-        <Image
-          src={product.imageUrl}
-          alt={product.productName}
-          width={400}
-          height={200}
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+      <div className="relative aspect-square overflow-hidden bg-[#F7F5F1]">
+
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.productName}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[#B8ADA3]">
+            <Package size={48} />
+          </div>
+        )}
 
         <Badge className="absolute top-3 left-3 border-0 bg-white text-[#79543A] shadow-sm hover:bg-white">
-          {product.category}
+          {categoryLabels[product.category] || product.category}
         </Badge>
 
         <button
@@ -66,102 +94,110 @@ export default function ProductCard({
 
         {/* Product Title */}
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <h3 className="text-lg font-bold text-[#111111]">
               {product.productName}
             </h3>
-            <p className="mt-1 text-xs text-[#77736E]">
+
+            <p className="mt-1 truncate text-xs text-[#77736E]">
               ID: {product._id}
             </p>
           </div>
-          <Package size={20} className="shrink-0 text-[#79543A]" />
+
+          <Package
+            size={20}
+            className="shrink-0 text-[#79543A]"
+          />
         </div>
 
-        {/* Pricing */}
+        {/* Pricing Information */}
         <div className="mt-5 grid grid-cols-2 gap-3">
+
           <div className="rounded-xl bg-[#F7F5F1] p-3">
             <p className="text-xs text-[#77736E]">
-              Box Price
+              Box / Packet Price
             </p>
-            <p className="mt-1 text-xl font-bold text-[#111111]">
-              {product.boxPrice}
+
+            <p className="mt-1 text-lg font-bold text-[#111111]">
+              {formatPrice(boxPrice)}
             </p>
           </div>
 
           <div className="rounded-xl bg-[#F7F5F1] p-3">
             <p className="text-xs text-[#77736E]">
-              Piece Price
+              Price per Piece
             </p>
-            <p className="mt-1 text-xl font-bold text-[#79543A]">
-              {product.piecePrice}
+
+            <p className="mt-1 text-lg font-bold text-[#79543A]">
+              {formatPrice(piecePrice)}
             </p>
           </div>
+
         </div>
 
         {/* Stock Information */}
         <div className="mt-5">
+
           <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#77736E]">
             Stock Information
           </p>
 
           <div className="space-y-3">
+
+            {/* Package Quantity */}
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-[#77736E]">
                 <Layers3 size={16} />
-                Packages
+                Total Packages
               </span>
+
               <span className="font-semibold text-[#111111]">
-                {product.packageQuantity} {product.unit}
+                {packageQuantity.toLocaleString()} {product.unit}
               </span>
             </div>
 
+            {/* Pieces per Package */}
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-[#77736E]">
                 <Package size={16} />
-                Total Pieces
+                Pieces / Package
               </span>
+
               <span className="font-semibold text-[#111111]">
-                {Number(product.pieceQuantity).toLocaleString()}
+                {pieceQuantity.toLocaleString()}
               </span>
             </div>
-          </div>
-        </div>
 
-        {/* Supplier Information */}
-        <div className="mt-5 rounded-xl border border-[#E7E2DC] p-3">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#79543A]">
-            Supplier Details
-          </p>
+            {/* Total Pieces */}
+            <div className="flex items-center justify-between rounded-lg bg-[#F7F5F1] p-3 text-sm">
+              <span className="flex items-center gap-2 font-semibold text-[#79543A]">
+                <Boxes size={17} />
+                Total Pieces
+              </span>
 
-          <div className="space-y-2 text-sm">
-            <p className="flex items-center gap-2 font-semibold text-[#292929]">
-              <UserRound size={15} className="text-[#79543A]" />
-              {product.supplierName}
-            </p>
+              <span className="text-base font-bold text-[#111111]">
+                {totalPieces.toLocaleString()}
+              </span>
+            </div>
 
-            <p className="flex items-center gap-2 text-xs text-[#77736E]">
-              <MapPin size={15} />
-              {product.supplierAddress}
-            </p>
-
-            <p className="flex items-center gap-2 text-xs text-[#77736E]">
-              <Phone size={15} />
-              {product.supplierPhone}
-            </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#E7E2DC] pt-4">
+        <div className="mt-5 flex items-center justify-between gap-2 border-t border-[#E7E2DC] pt-4">
+
           <div className="flex items-center gap-2 text-xs text-[#77736E]">
-            <CalendarDays size={14} />
-            {product.purchaseDate}
+            <Tag size={14} />
+            <span>Inventory Product</span>
           </div>
 
-          <div className="flex items-center gap-1 text-xs font-semibold text-[#79543A]">
-            <FileText size={14} />
-            {product.invoiceNumber}
-          </div>
+          <Badge
+            variant="outline"
+            className="border-[#E7E2DC] text-[#79543A]"
+          >
+            {product.unit}
+          </Badge>
+
         </div>
 
       </CardContent>

@@ -16,7 +16,6 @@ import {
   PackagePlus,
   Boxes,
   X,
-  ShoppingCart,
   ClipboardList,
   Warehouse,
 } from "lucide-react";
@@ -45,14 +44,25 @@ const inputStyles =
 
 export default function AddProductPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [boxPrice, setBoxPrice] = useState("");
+  const [pieceQuantity, setPieceQuantity] = useState("");
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Calculate price per piece automatically
+  const pricePerPiece =
+    Number(pieceQuantity) > 0 && Number(boxPrice) >= 0 && boxPrice !== ""
+      ? (Number(boxPrice) / Number(pieceQuantity)).toFixed(2)
+      : "";
+
+  // Image preview cleanup
   useEffect(() => {
     if (!imagePreview) return;
 
     return () => URL.revokeObjectURL(imagePreview);
   }, [imagePreview]);
 
+  // Handle image selection
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -66,8 +76,21 @@ export default function AddProductPage() {
     setImagePreview(URL.createObjectURL(file));
   };
 
+  // Remove selected image
   const handleRemoveImage = () => {
     setImagePreview(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Reset form
+  const handleReset = (form: HTMLFormElement) => {
+    form.reset();
+    setImagePreview(null);
+    setBoxPrice("");
+    setPieceQuantity("");
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -82,10 +105,13 @@ export default function AddProductPage() {
     const formData = new FormData(form);
 
     try {
-      const res = await fetch("http://localhost:5000/add-product", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/add-product`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const resData = await res.json();
 
@@ -104,8 +130,7 @@ export default function AddProductPage() {
         "success",
       );
 
-      form.reset();
-      setImagePreview(null);
+      handleReset(form);
     } catch (error) {
       console.error("Product submission error:", error);
 
@@ -120,6 +145,7 @@ export default function AddProductPage() {
   return (
     <div className="min-h-screen bg-[#F7F5F1] p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-5xl space-y-7">
+
         {/* Header */}
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div className="space-y-3">
@@ -153,86 +179,6 @@ export default function AddProductPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* Buying Information
-          <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
-            <CardHeader className="px-5">
-              <CardTitle className="flex items-center gap-2 text-lg font-bold text-[#111111]">
-                <ShoppingCart size={20} className="text-[#79543A]" />
-                Buying Information
-              </CardTitle>
-
-              <CardDescription className="text-[#77736E]">
-                Enter supplier and purchase details for this transaction.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="grid gap-5 px-5 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="supplierName">
-                  Supplier Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="supplierName"
-                  name="supplierName"
-                  placeholder="Enter supplier name"
-                  required
-                  className={inputStyles}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="supplierPhone">
-                  Supplier Phone <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="supplierPhone"
-                  name="supplierPhone"
-                  type="tel"
-                  placeholder="+966 5X XXX XXXX"
-                  required
-                  className={inputStyles}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="purchaseDate">
-                  Purchase Date <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="purchaseDate"
-                  name="purchaseDate"
-                  type="date"
-                  required
-                  defaultValue={new Date().toLocaleDateString("en-CA")}
-                  className={inputStyles}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="invoiceNumber">
-                  Invoice Number <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="invoiceNumber"
-                  name="invoiceNumber"
-                  placeholder="e.g. INV-2026-001"
-                  className={inputStyles}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="supplierAddress">Supplier Address</Label>
-                <Input
-                  id="supplierAddress"
-                  name="supplierAddress"
-                  placeholder="Enter supplier address"
-                  className={inputStyles}
-                />
-              </div>
-            </CardContent>
-          </Card> */}
-
           {/* Product Information */}
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
             <CardHeader className="px-5">
@@ -251,6 +197,7 @@ export default function AddProductPage() {
                 <Label htmlFor="productName">
                   Product Name <span className="text-red-500">*</span>
                 </Label>
+
                 <Input
                   id="productName"
                   name="productName"
@@ -310,6 +257,7 @@ export default function AddProductPage() {
                   Price per Box / Packet (SAR)
                   <span className="text-red-500">*</span>
                 </Label>
+
                 <Input
                   id="boxPrice"
                   name="boxPrice"
@@ -319,16 +267,23 @@ export default function AddProductPage() {
                   placeholder="0.00"
                   className={inputStyles}
                   required
+                  value={boxPrice}
+                  onChange={(e) => setBoxPrice(e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="piecePrice">Price per Piece (SAR)</Label>
+                <Label htmlFor="piecePrice">
+                  Price per Piece (SAR)
+                </Label>
+
                 <Input
                   id="piecePrice"
                   name="piecePrice"
                   type="number"
                   min="0"
+                  readOnly
+                  value={pricePerPiece}
                   step="0.01"
                   placeholder="0.00"
                   className={inputStyles}
@@ -352,7 +307,10 @@ export default function AddProductPage() {
 
             <CardContent className="grid gap-5 px-5 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="packageQuantity">Quantity (Box / Packet)</Label>
+                <Label htmlFor="packageQuantity">
+                  Quantity (Box / Packet)
+                </Label>
+
                 <Input
                   id="packageQuantity"
                   name="packageQuantity"
@@ -362,24 +320,30 @@ export default function AddProductPage() {
                   defaultValue="0"
                   className={inputStyles}
                 />
+
                 <p className="text-xs text-[#77736E]">
                   Total boxes or packets purchased.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pieceQuantity">Quantity (Pieces in each Box/Packet)</Label>
+                <Label htmlFor="pieceQuantity">
+                  Quantity (Pieces in each Box/Packet)
+                </Label>
+
                 <Input
                   id="pieceQuantity"
                   name="pieceQuantity"
                   type="number"
                   min="0"
                   step="1"
-                  defaultValue="0"
+                  value={pieceQuantity}
+                  onChange={(e) => setPieceQuantity(e.target.value)}
                   className={inputStyles}
                 />
+
                 <p className="text-xs text-[#77736E]">
-                  Total individual pieces purchased.
+                  Number of individual pieces in each box or packet.
                 </p>
               </div>
             </CardContent>
@@ -400,6 +364,7 @@ export default function AddProductPage() {
 
             <CardContent className="px-5">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+
                 {/* Image Preview */}
                 <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E7E2DC] bg-[#F7F5F1] sm:w-48">
                   {imagePreview ? (
@@ -426,14 +391,19 @@ export default function AddProductPage() {
                       <div className="rounded-full bg-white p-4">
                         <ImagePlus size={28} />
                       </div>
-                      <span className="text-xs font-medium">Image Preview</span>
+
+                      <span className="text-xs font-medium">
+                        Image Preview
+                      </span>
                     </div>
                   )}
                 </div>
 
                 {/* Upload */}
                 <div className="flex-1 space-y-3">
-                  <Label htmlFor="productImage">Upload Product Image</Label>
+                  <Label htmlFor="productImage">
+                    Upload Product Image
+                  </Label>
 
                   <Input
                     ref={fileInputRef}
@@ -468,8 +438,11 @@ export default function AddProductPage() {
               type="button"
               variant="outline"
               className="h-11 border-[#E7E2DC] bg-white px-6 text-[#292929] hover:border-[#79543A] hover:bg-[#F7F5F1] hover:text-[#79543A]"
+              onClick={() => {
+                window.location.href = "/admin/inventory";
+              }}
             >
-              <Link href="/admin/inventory">Cancel</Link>
+              Cancel
             </Button>
 
             <Button
