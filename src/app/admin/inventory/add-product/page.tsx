@@ -152,7 +152,8 @@ export default function AddProductPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Buying Information */}
+
+          {/* Buying Information
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
             <CardHeader className="px-5">
               <CardTitle className="flex items-center gap-2 text-lg font-bold text-[#111111]">
@@ -230,7 +231,7 @@ export default function AddProductPage() {
                 />
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Product Information */}
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
@@ -367,7 +368,7 @@ export default function AddProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pieceQuantity">Quantity (Pieces)</Label>
+                <Label htmlFor="pieceQuantity">Quantity (Pieces in each Box/Packet)</Label>
                 <Input
                   id="pieceQuantity"
                   name="pieceQuantity"
