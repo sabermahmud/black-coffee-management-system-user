@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import {
   Package,
@@ -6,10 +5,12 @@ import {
   Boxes,
   MoreHorizontal,
   Tag,
+  ShoppingCart,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type Product = {
   _id: string;
@@ -23,29 +24,12 @@ type Product = {
   unit: string;
 };
 
-export default function ProductCard({
-  product,
-}: {
-  product: Product;
-}) {
-  const boxPrice = Number(product.boxPrice) || 0;
-  const piecePrice = Number(product.piecePrice) || 0;
+export default function ProductCard({ product }: { product: Product }) {
   const packageQuantity = Number(product.packageQuantity) || 0;
   const pieceQuantity = Number(product.pieceQuantity) || 0;
 
-  // Calculate total stock pieces
   const totalPieces = packageQuantity * pieceQuantity;
 
-  // Format currency
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-SA", {
-      style: "currency",
-      currency: "SAR",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(price);
-
-  // Category labels
   const categoryLabels: Record<string, string> = {
     coffee: "Coffee & Beans",
     beverages: "Beverages",
@@ -58,11 +42,9 @@ export default function ProductCard({
   };
 
   return (
-    <Card className="group gap-0 overflow-hidden border-[#E7E2DC] bg-white py-0 shadow-none transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#79543A]/5">
-
+    <Card className="group gap-0 overflow-hidden border-[#E7E2DC] bg-white py-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#79543A]/10">
       {/* Product Image */}
-      <div className="relative aspect-square overflow-hidden bg-[#F7F5F1]">
-
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#F7F5F1]">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -73,7 +55,7 @@ export default function ProductCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center text-[#B8ADA3]">
-            <Package size={48} />
+            <Package size={48} strokeWidth={1.5} />
           </div>
         )}
 
@@ -83,7 +65,7 @@ export default function ProductCard({
 
         <button
           type="button"
-          className="absolute top-3 right-3 rounded-lg bg-white p-2 text-[#77736E] shadow-sm transition hover:bg-[#111111] hover:text-white"
+          className="absolute top-3 right-3 rounded-lg bg-white/95 p-2 text-[#77736E] shadow-sm transition hover:bg-[#111111] hover:text-white"
           aria-label="More options"
         >
           <MoreHorizontal size={18} />
@@ -91,11 +73,10 @@ export default function ProductCard({
       </div>
 
       <CardContent className="p-5">
-
         {/* Product Title */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-lg font-bold text-[#111111]">
+            <h3 className="line-clamp-1 text-lg font-bold text-[#111111]">
               {product.productName}
             </h3>
 
@@ -104,47 +85,26 @@ export default function ProductCard({
             </p>
           </div>
 
-          <Package
-            size={20}
-            className="shrink-0 text-[#79543A]"
-          />
-        </div>
-
-        {/* Pricing Information */}
-        <div className="mt-5 grid grid-cols-2 gap-3">
-
-          <div className="rounded-xl bg-[#F7F5F1] p-3">
-            <p className="text-xs text-[#77736E]">
-              Box / Packet Price
-            </p>
-
-            <p className="mt-1 text-lg font-bold text-[#111111]">
-              {formatPrice(boxPrice)}
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-[#F7F5F1] p-3">
-            <p className="text-xs text-[#77736E]">
-              Price per Piece
-            </p>
-
-            <p className="mt-1 text-lg font-bold text-[#79543A]">
-              {formatPrice(piecePrice)}
-            </p>
-          </div>
-
+          <Package size={20} className="shrink-0 text-[#79543A]" />
         </div>
 
         {/* Stock Information */}
         <div className="mt-5">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#77736E]">
+              Stock Information
+            </p>
 
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[#77736E]">
-            Stock Information
-          </p>
+            <Badge
+              variant="outline"
+              className="border-[#E7E2DC] text-[#79543A]"
+            >
+              {product.unit}
+            </Badge>
+          </div>
 
           <div className="space-y-3">
-
-            {/* Package Quantity */}
+            {/* Total Packages */}
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-[#77736E]">
                 <Layers3 size={16} />
@@ -152,7 +112,7 @@ export default function ProductCard({
               </span>
 
               <span className="font-semibold text-[#111111]">
-                {packageQuantity.toLocaleString()} {product.unit}
+                {packageQuantity.toLocaleString()}
               </span>
             </div>
 
@@ -179,27 +139,23 @@ export default function ProductCard({
                 {totalPieces.toLocaleString()}
               </span>
             </div>
-
           </div>
         </div>
+
+        {/* Order Button */}
+        <Button
+          type="button"
+          className="mt-5 h-11 w-full gap-2 bg-[#79543A] font-semibold text-white transition-colors hover:bg-[#5F402D]"
+        >
+          <ShoppingCart size={17} />
+          Order Now
+        </Button>
 
         {/* Footer */}
-        <div className="mt-5 flex items-center justify-between gap-2 border-t border-[#E7E2DC] pt-4">
-
-          <div className="flex items-center gap-2 text-xs text-[#77736E]">
-            <Tag size={14} />
-            <span>Inventory Product</span>
-          </div>
-
-          <Badge
-            variant="outline"
-            className="border-[#E7E2DC] text-[#79543A]"
-          >
-            {product.unit}
-          </Badge>
-
+        <div className="mt-5 flex items-center gap-2 border-t border-[#E7E2DC] pt-4 text-xs text-[#77736E]">
+          <Tag size={14} />
+          <span>Inventory Product</span>
         </div>
-
       </CardContent>
     </Card>
   );
