@@ -1,6 +1,13 @@
+
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -10,6 +17,8 @@ import {
   Boxes,
   X,
   ShoppingCart,
+  ClipboardList,
+  Warehouse,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,39 +38,91 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import swal from "sweetalert";
+
+const inputStyles =
+  "h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20";
 
 export default function AddProductPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
-    };
+    if (!imagePreview) return;
+
+    return () => URL.revokeObjectURL(imagePreview);
   }, [imagePreview]);
 
   const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      event.target.value = "";
+      return;
+    }
+
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  // Submit product information and image
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
-    // TODO: Connect product creation API here.
-    console.log(Object.fromEntries(formData.entries()));
+    try {
+      const res = await fetch("http://localhost:5000/add-product", {
+        method: "POST",
+        body: formData,
+      });
+
+      const resData = await res.json();
+
+      if (!res.ok) {
+        swal(
+          "Oops!",
+          resData.message || "Product creation failed",
+          "warning",
+        );
+        return;
+      }
+
+      swal(
+        "Success!",
+        resData.message || "Product added successfully!",
+        "success",
+      );
+
+      form.reset();
+      setImagePreview(null);
+    } catch (error) {
+      console.error("Product submission error:", error);
+
+      swal(
+        "Error!",
+        "Something went wrong. Please try again.",
+        "error",
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-[#F7F5F1] p-4 sm:p-6 lg:p-8">
-      <div className="mx-auto max-w-5xl space-y-6">
+      <div className="mx-auto max-w-5xl space-y-7">
         {/* Header */}
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="space-y-2">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+          <div className="space-y-3">
             <Link
               href="/admin/inventory"
               className="inline-flex items-center gap-2 text-sm font-medium text-[#77736E] transition hover:text-[#79543A]"
@@ -71,26 +132,25 @@ export default function AddProductPage() {
             </Link>
 
             <div>
-              <p className="text-sm font-medium text-[#79543A]">
+              <p className="text-xs font-bold tracking-[0.15em] text-[#79543A]">
                 BLACK COFFEE / INVENTORY
               </p>
 
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#111111] md:text-3xl">
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#111111] md:text-3xl">
                 Add New Product
               </h1>
 
-              <p className="mt-1 text-sm text-[#77736E]">
-                Add a new product to your coffee shop inventory.
+              <p className="mt-2 text-sm text-[#77736E]">
+                Add product details, purchase information and stock quantities.
               </p>
             </div>
           </div>
 
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F0EDE8] text-[#79543A]">
-            <PackagePlus size={25} />
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#F0EDE8] text-[#79543A]">
+            <PackagePlus size={27} />
           </div>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Buying Information */}
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
@@ -105,78 +165,68 @@ export default function AddProductPage() {
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="grid gap-6 px-5 md:grid-cols-2">
-              {/* Supplier Name */}
+            <CardContent className="grid gap-5 px-5 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="supplierName" className="text-[#292929]">
+                <Label htmlFor="supplierName">
                   Supplier Name <span className="text-red-500">*</span>
                 </Label>
-
                 <Input
                   id="supplierName"
                   name="supplierName"
                   placeholder="Enter supplier name"
                   required
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  className={inputStyles}
                 />
               </div>
 
-              {/* Supplier Phone */}
               <div className="space-y-2">
-                <Label htmlFor="supplierPhone" className="text-[#292929]">
+                <Label htmlFor="supplierPhone">
                   Supplier Phone <span className="text-red-500">*</span>
                 </Label>
-
                 <Input
                   id="supplierPhone"
                   name="supplierPhone"
                   type="tel"
                   placeholder="+966 5X XXX XXXX"
                   required
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  className={inputStyles}
                 />
               </div>
 
-              {/* Purchase Date */}
               <div className="space-y-2">
-                <Label htmlFor="purchaseDate" className="text-[#292929]">
+                <Label htmlFor="purchaseDate">
                   Purchase Date <span className="text-red-500">*</span>
                 </Label>
-
                 <Input
                   id="purchaseDate"
                   name="purchaseDate"
                   type="date"
                   required
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  defaultValue={new Date().toLocaleDateString("en-CA")}
+                  className={inputStyles}
                 />
               </div>
 
-              {/* Invoice Number */}
               <div className="space-y-2">
-                <Label htmlFor="invoiceNumber" className="text-[#292929]">
-                  Invoice Number
+                <Label htmlFor="invoiceNumber">
+                  Invoice Number <span className="text-red-500">*</span>
                 </Label>
-
                 <Input
                   id="invoiceNumber"
                   name="invoiceNumber"
-                  placeholder="Enter invoice number"
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  placeholder="e.g. INV-2026-001"
+                  className={inputStyles}
+                  required
                 />
               </div>
 
-              {/* Supplier Address */}
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="supplierAddress" className="text-[#292929]">
-                  Supplier Address
-                </Label>
-
+                <Label htmlFor="supplierAddress">Supplier Address</Label>
                 <Input
                   id="supplierAddress"
                   name="supplierAddress"
                   placeholder="Enter supplier address"
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  className={inputStyles}
                 />
               </div>
             </CardContent>
@@ -191,46 +241,97 @@ export default function AddProductPage() {
               </CardTitle>
 
               <CardDescription className="text-[#77736E]">
-                Enter basic information about your product.
+                Enter the basic information about your product.
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="grid gap-6 px-5 md:grid-cols-2">
-              {/* Product Name */}
+            <CardContent className="grid gap-5 px-5 md:grid-cols-2">
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="productName" className="text-[#292929]">
+                <Label htmlFor="productName">
                   Product Name <span className="text-red-500">*</span>
                 </Label>
-
                 <Input
                   id="productName"
                   name="productName"
                   placeholder="e.g. Nescafe Classic Coffee"
                   required
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  className={inputStyles}
                 />
               </div>
 
-              {/* Category */}
               <div className="space-y-2">
-                <Label htmlFor="category" className="text-[#292929]">
+                <Label htmlFor="category">
                   Category <span className="text-red-500">*</span>
                 </Label>
 
                 <Select name="category" required>
-                  <SelectTrigger className="h-11 w-full border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20">
+                  <SelectTrigger
+                    id="category"
+                    className={`w-full ${inputStyles}`}
+                  >
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="coffee">Coffee</SelectItem>
+                    <SelectItem value="coffee">Coffee & Beans</SelectItem>
                     <SelectItem value="beverages">Beverages</SelectItem>
                     <SelectItem value="dairy">Dairy Products</SelectItem>
-                    <SelectItem value="bakery">Bakery</SelectItem>
-                    <SelectItem value="packaging">Packaging</SelectItem>
+                    <SelectItem value="bakery">Bakery & Snacks</SelectItem>
+                    <SelectItem value="sweets">Sweets</SelectItem>
+                    <SelectItem value="packaging">Packaging Materials</SelectItem>
+                    <SelectItem value="cups">Cups & Accessories</SelectItem>
                     <SelectItem value="others">Others</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="unit">Stock Unit</Label>
+
+                <Select name="unit" defaultValue="piece">
+                  <SelectTrigger id="unit" className={`w-full ${inputStyles}`}>
+                    <SelectValue placeholder="Select unit" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="piece">Piece</SelectItem>
+                    <SelectItem value="box">Box</SelectItem>
+                    <SelectItem value="packet">Packet</SelectItem>
+                    <SelectItem value="kg">Kilogram (KG)</SelectItem>
+                    <SelectItem value="liter">Liter (L)</SelectItem>
+                    <SelectItem value="carton">Carton</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="boxPrice">
+                  Price per Box / Packet (SAR)
+                  <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="boxPrice"
+                  name="boxPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className={inputStyles}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="piecePrice">Price per Piece (SAR)</Label>
+                <Input
+                  id="piecePrice"
+                  name="piecePrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className={inputStyles}
+                />
               </div>
             </CardContent>
           </Card>
@@ -238,22 +339,19 @@ export default function AddProductPage() {
           {/* Stock Information */}
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
             <CardHeader className="px-5">
-              <CardTitle className="text-lg font-bold text-[#111111]">
+              <CardTitle className="flex items-center gap-2 text-lg font-bold text-[#111111]">
+                <Warehouse size={20} className="text-[#79543A]" />
                 Stock Information
               </CardTitle>
 
               <CardDescription className="text-[#77736E]">
-                Specify the available product quantities.
+                Specify the quantities received from this purchase.
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="grid gap-6 px-5 md:grid-cols-2">
-              {/* Box / Packet */}
+            <CardContent className="grid gap-5 px-5 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="packageQuantity" className="text-[#292929]">
-                  Quantity (Box / Packet)
-                </Label>
-
+                <Label htmlFor="packageQuantity">Quantity (Box / Packet)</Label>
                 <Input
                   id="packageQuantity"
                   name="packageQuantity"
@@ -261,21 +359,15 @@ export default function AddProductPage() {
                   min="0"
                   step="1"
                   defaultValue="0"
-                  placeholder="Enter quantity"
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  className={inputStyles}
                 />
-
                 <p className="text-xs text-[#77736E]">
-                  Total number of boxes or packets.
+                  Total boxes or packets purchased.
                 </p>
               </div>
 
-              {/* Pieces */}
               <div className="space-y-2">
-                <Label htmlFor="pieceQuantity" className="text-[#292929]">
-                  Quantity (Pieces)
-                </Label>
-
+                <Label htmlFor="pieceQuantity">Quantity (Pieces)</Label>
                 <Input
                   id="pieceQuantity"
                   name="pieceQuantity"
@@ -283,12 +375,10 @@ export default function AddProductPage() {
                   min="0"
                   step="1"
                   defaultValue="0"
-                  placeholder="Enter quantity"
-                  className="h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20"
+                  className={inputStyles}
                 />
-
                 <p className="text-xs text-[#77736E]">
-                  Total number of individual pieces.
+                  Total individual pieces purchased.
                 </p>
               </div>
             </CardContent>
@@ -297,19 +387,20 @@ export default function AddProductPage() {
           {/* Product Image */}
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
             <CardHeader className="px-5">
-              <CardTitle className="text-lg font-bold text-[#111111]">
+              <CardTitle className="flex items-center gap-2 text-lg font-bold text-[#111111]">
+                <ImagePlus size={20} className="text-[#79543A]" />
                 Product Image
               </CardTitle>
 
               <CardDescription className="text-[#77736E]">
-                Upload an image of your product.
+                Upload a clear image of your product.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="px-5">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
                 {/* Image Preview */}
-                <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E7E2DC] bg-[#F7F5F1] sm:w-48">
+                <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E7E2DC] bg-[#F7F5F1] sm:w-48">
                   {imagePreview ? (
                     <>
                       <Image
@@ -317,50 +408,61 @@ export default function AddProductPage() {
                         alt="Product preview"
                         fill
                         unoptimized
-                        className="object-contain p-2"
+                        className="object-contain p-3"
                       />
 
                       <button
                         type="button"
-                        onClick={() => setImagePreview(null)}
-                        className="absolute right-2 top-2 z-10 rounded-full bg-white p-1.5 text-red-500 shadow-sm transition hover:bg-red-50"
+                        onClick={handleRemoveImage}
+                        aria-label="Remove product image"
+                        className="absolute right-2 top-2 z-10 rounded-full bg-white p-2 text-red-500 shadow-sm transition hover:bg-red-50"
                       >
                         <X size={16} />
                       </button>
                     </>
                   ) : (
-                    <div className="flex flex-col items-center gap-2 text-[#77736E]">
-                      <ImagePlus size={35} />
-                      <span className="text-xs">Image Preview</span>
+                    <div className="flex flex-col items-center gap-3 text-[#77736E]">
+                      <div className="rounded-full bg-white p-4">
+                        <ImagePlus size={28} />
+                      </div>
+                      <span className="text-xs font-medium">Image Preview</span>
                     </div>
                   )}
                 </div>
 
                 {/* Upload */}
                 <div className="flex-1 space-y-3">
-                  <Label htmlFor="productImage" className="text-[#292929]">
-                    Upload Product Image
-                  </Label>
+                  <Label htmlFor="productImage">Upload Product Image</Label>
 
                   <Input
+                    ref={fileInputRef}
                     id="productImage"
                     name="productImage"
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     onChange={handleImageChange}
                     className="h-11 cursor-pointer border-[#E7E2DC] bg-white file:mr-3 file:rounded-md file:border-0 file:bg-[#F0EDE8] file:px-3 file:py-1 file:text-xs file:font-semibold file:text-[#79543A] hover:file:bg-[#E7DCD1]"
                   />
 
-                  <p className="text-xs text-[#77736E]">
+                  <p className="text-xs leading-relaxed text-[#77736E]">
                     Supported formats: JPG, PNG, WEBP.
+                    <br />
+                    Choose a high-quality image for better product
+                    identification.
                   </p>
+
+                  {imagePreview && (
+                    <p className="text-xs font-medium text-green-700">
+                      Image selected successfully.
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Actions */}
-          <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+          <div className="flex flex-col-reverse justify-end gap-3 border-t border-[#E7E2DC] pt-5 sm:flex-row">
             <Button
               type="button"
               variant="outline"
@@ -373,7 +475,7 @@ export default function AddProductPage() {
               type="submit"
               className="h-11 bg-[#111111] px-8 text-white transition hover:bg-[#79543A]"
             >
-              <PackagePlus size={18} className="mr-2" />
+              <ClipboardList size={18} className="mr-2" />
               Save Product
             </Button>
           </div>
