@@ -1,35 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Coffee,
-  Package,
-  Boxes,
-  Truck,
-  ShoppingBag,
-  LayoutDashboard,
-  Layers3,
-} from "lucide-react";
+import { ArrowRight, Coffee, Package, ShoppingBag, Boxes } from "lucide-react";
 
-type Product = {
-  _id: string;
-  productName: string;
-  category: string;
-  imageUrl: string;
-  imagePublicId: string;
-  boxPrice: string;
-  piecePrice: string;
-  packageQuantity: string;
-  pieceQuantity: string;
-  unit: string;
-  supplierName: string;
-  supplierAddress: string;
-  supplierPhone: string;
-  invoiceNumber: string;
-  purchaseDate: string;
-};
+import ProductCarousel, {
+  type Product,
+} from "@/components/home/product-carousel";
 
-const categoryLabels: Record<string, string> = {
+const categoryNames: Record<string, string> = {
   coffee: "Coffee & Beans",
   beverages: "Beverages",
   dairy: "Dairy Products",
@@ -40,214 +16,196 @@ const categoryLabels: Record<string, string> = {
   others: "Others",
 };
 
-const productsData = async (): Promise<Product[]> => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/products`, {
-    cache: "no-store",
-  });
+async function productsData(): Promise<Product[]> {
+  const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
+  if (!serverUrl) {
+    console.error("NEXT_PUBLIC_SERVER_URL is not configured.");
+    return [];
   }
 
-  const data: Product[] = await res.json();
+  try {
+    const res = await fetch(`${serverUrl}/products`, {
+      cache: "no-store",
+    });
 
-  return Array.isArray(data) ? data : [];
-};
+    if (!res.ok) {
+      console.error("Failed to fetch products:", res.status);
+      return [];
+    }
 
-function ProductCard({ product }: { product: Product }) {
-  const packageQuantity = Number(product.packageQuantity) || 0;
-  const pieceQuantity = Number(product.pieceQuantity) || 0;
-  const totalPieces = packageQuantity * pieceQuantity;
+    const data = await res.json();
 
-  return (
-    <div className="group overflow-hidden rounded-2xl border border-[#E7E2DC] bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[#79543A]/10">
-      {/* Product Image */}
-      <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#F7F5F1]">
-        {product.imageUrl ? (
-          <Image
-            src={product.imageUrl}
-            alt={product.productName}
-            fill
-            unoptimized
-            sizes="(max-width: 768px) 100vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <Package size={48} strokeWidth={1.5} className="text-[#B8ADA3]" />
-        )}
-
-        <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#79543A] shadow-sm">
-          {categoryLabels[product.category] || product.category}
-        </span>
-      </div>
-
-      {/* Product Information */}
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="truncate text-lg font-bold text-[#111111]">
-              {product.productName}
-            </h3>
-          </div>
-
-          <Package size={20} className="shrink-0 text-[#79543A]" />
-        </div>
-
-        {/* Stock Information */}
-        <div className="mt-5">
-          <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#77736E]">
-              Stock Information
-            </p>
-
-            <span className="rounded-full border border-[#E7E2DC] px-3 py-1 text-xs text-[#79543A]">
-              {product.unit}
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-[#77736E]">
-                <Layers3 size={16} />
-                Total Packages
-              </span>
-
-              <span className="font-semibold text-[#111111]">
-                {packageQuantity.toLocaleString()}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <span className="flex items-center gap-2 text-[#77736E]">
-                <Package size={16} />
-                Pieces / Package
-              </span>
-
-              <span className="font-semibold text-[#111111]">
-                {pieceQuantity.toLocaleString()}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg bg-[#F7F5F1] p-3 text-sm">
-              <span className="flex items-center gap-2 font-semibold text-[#79543A]">
-                <Boxes size={17} />
-                Total Pieces
-              </span>
-
-              <span className="text-base font-bold text-[#111111]">
-                {totalPieces.toLocaleString()}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OverviewCard({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-4 rounded-2xl border border-[#E7E2DC] bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:shadow-[#79543A]/10">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#F7F5F1] text-[#79543A]">
-        {icon}
-      </div>
-
-      <div>
-        <p className="text-sm text-[#77736E]">{title}</p>
-
-        <p className="mt-1 text-2xl font-bold text-[#111111]">
-          {value.toLocaleString()}
-        </p>
-      </div>
-    </div>
-  );
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Products fetch error:", error);
+    return [];
+  }
 }
 
 export default async function HomePage() {
-  const allProducts = await productsData();
+  const products = await productsData();
 
-  const categories = [
-    ...new Set(allProducts.map((product) => product.category).filter(Boolean)),
-  ];
-
-  const suppliers = new Set(
-    allProducts.map((product) => product.supplierName).filter(Boolean),
+  const categories = Array.from(
+    new Set(
+      products
+        .map((product) => product.category?.toLowerCase())
+        .filter(Boolean),
+    ),
   );
 
-  const allCups = allProducts.filter((product) => product.category === "cups");
+  const totalProducts = products.length;
 
-  const categoryGroups = categories.map((category) => ({
-    category,
-    products: allProducts
-      .filter((product) => product.category === category)
-      .slice(0, 4),
-    total: allProducts.filter((product) => product.category === category)
-      .length,
-  }));
+  const totalStock = products.reduce((total, product) => {
+    return total + (Number(product.packageQuantity) || 0);
+  }, 0);
 
   return (
-    <main className="min-h-screen bg-[#F7F5F1] px-4 py-8 md:px-8 lg:px-10">
-      <div className="mx-auto max-w-7xl space-y-10">
+    <main className="min-h-screen bg-[#F7F5F1] text-[#111111]">
+      <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
+        {/* Welcome Banner */}
+        <section className="relative overflow-hidden rounded-2xl bg-[#79543A] px-6 py-12 text-white sm:px-10 lg:py-16">
+          <div className="relative z-10 max-w-2xl">
+            <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-[#E7D8CC]">
+              Welcome to Black Coffee
+            </p>
 
+            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+              Manage Your Coffee Store Smarter.
+            </h1>
+
+            <p className="mt-4 max-w-xl text-sm leading-7 text-[#F1E8E1] sm:text-base">
+              Keep track of your products, stock and store inventory from one
+              simple management system.
+            </p>
+
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[#79543A] transition hover:bg-[#F7F5F1]"
+              >
+                Explore Products
+                <ArrowRight size={17} />
+              </Link>
+
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Admin Dashboard
+              </Link>
+            </div>
+          </div>
+
+          <Coffee
+            className="absolute -right-8 -bottom-12 h-64 w-64 rotate-[-15deg] text-white/10 sm:right-8 sm:h-80 sm:w-80"
+            strokeWidth={1}
+          />
+        </section>
+
+        {/* Store Overview */}
+        <section>
+          <div className="mb-5">
+            <h2 className="text-xl font-bold sm:text-2xl">Store Overview</h2>
+            <p className="mt-1 text-sm text-[#77736E]">
+              A quick look at your store inventory.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="flex items-center gap-4 rounded-xl border border-[#E7E2DC] bg-white p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F5F1] text-[#79543A]">
+                <ShoppingBag size={24} />
+              </div>
+
+              <div>
+                <p className="text-sm text-[#77736E]">Total Products</p>
+                <p className="text-2xl font-bold">{totalProducts}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-xl border border-[#E7E2DC] bg-white p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F5F1] text-[#79543A]">
+                <Boxes size={24} />
+              </div>
+
+              <div>
+                <p className="text-sm text-[#77736E]">Total Categories</p>
+                <p className="text-2xl font-bold">{categories.length}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 rounded-xl border border-[#E7E2DC] bg-white p-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F5F1] text-[#79543A]">
+                <Package size={24} />
+              </div>
+
+              <div>
+                <p className="text-sm text-[#77736E]">Total Packages</p>
+                <p className="text-2xl font-bold">{totalStock}</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Product Categories */}
         <section className="space-y-8">
+          <div>
+            <h2 className="text-xl font-bold sm:text-2xl">
+              Explore Our Products
+            </h2>
+            <p className="mt-1 text-sm text-[#77736E]">
+              Browse products by category.
+            </p>
+          </div>
 
-          {categoryGroups.length > 0 ? (
-            categoryGroups.map(({ category, products, total }) => (
-              <div key={category}>
-                <div className="mb-5 flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold text-[#111111]">
-                      {categoryLabels[category] || category}
-                    </h3>
+          {categories.length > 0 ? (
+            categories.map((category) => {
+              const categoryProducts = products.filter(
+                (product) => product.category?.toLowerCase() === category,
+              );
 
-                    <p className="mt-1 text-sm text-[#77736E]">
-                      {total} products available
-                    </p>
+              return (
+                <section key={category}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-bold">
+                        {categoryNames[category] || category}
+                      </h3>
+
+                      <p className="mt-1 text-xs text-[#77736E]">
+                        {categoryProducts.length} products
+                      </p>
+                    </div>
+
+                    <Link
+                      href="/products"
+                      className="flex shrink-0 items-center gap-1 text-sm font-semibold text-[#79543A] transition hover:text-[#5F402D]"
+                    >
+                      View All
+                      <ArrowRight size={16} />
+                    </Link>
                   </div>
 
-                  <Link
-                    href={`/products?category=${encodeURIComponent(category)}`}
-                    className="flex items-center gap-1 text-sm font-semibold text-[#79543A] transition hover:text-[#5F402D]"
-                  >
-                    View All
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                  {products.map((product) => (
-                    <ProductCard key={product._id} product={product} />
-                  ))}
-                </div>
-              </div>
-            ))
+                  <ProductCarousel products={categoryProducts} />
+                </section>
+              );
+            })
           ) : (
-            <div className="rounded-2xl border border-dashed border-[#E7E2DC] bg-white py-16 text-center">
-              <ShoppingBag size={42} className="mx-auto text-[#B8ADA3]" />
+            <div className="rounded-xl border border-[#E7E2DC] bg-white px-6 py-12 text-center">
+              <ShoppingBag className="mx-auto mb-3 h-10 w-10 text-[#B8ADA3]" />
 
-              <h3 className="mt-4 font-semibold text-[#111111]">
-                No Products Available
-              </h3>
+              <h3 className="font-semibold">No Products Available</h3>
 
               <p className="mt-2 text-sm text-[#77736E]">
-                Your store products will appear here.
+                Add products to your store to see them here.
               </p>
 
               <Link
-                href="/products"
-                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#79543A] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#5F402D]"
+                href="/admin"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#79543A] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#5F402D]"
               >
-                Explore Products
+                Manage Products
                 <ArrowRight size={16} />
               </Link>
             </div>
