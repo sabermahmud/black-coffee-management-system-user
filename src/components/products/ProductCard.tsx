@@ -1,16 +1,16 @@
-import Image from "next/image";
 import {
-  Package,
-  Layers3,
   Boxes,
+  Layers3,
   MoreHorizontal,
-  Tag,
+  Package,
   ShoppingCart,
+  Tag,
 } from "lucide-react";
+import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 type Product = {
   _id: string;

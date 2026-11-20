@@ -1,7 +1,5 @@
 import ProductCard from "@/components/products/ProductCard";
 
-
-
 type Product = {
   _id: string;
   productName: string;
@@ -21,12 +19,9 @@ type Product = {
 };
 
 const productsData = async (): Promise<Product[]> => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SERVER_URL}/products`,
-    {
-      cache: "no-store",
-    }
-  );
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/products`, {
+    cache: "no-store",
+  });
 
   if (!res.ok) {
     throw new Error("Failed to fetch products");
@@ -42,7 +37,6 @@ export default async function Page() {
 
   return (
     <div className="min-h-screen bg-[#F7F5F1] p-4 sm:p-6 lg:p-8">
-
       {/* Page Header */}
       <div className="mb-7">
         <p className="text-sm font-medium text-[#79543A]">
@@ -60,9 +54,7 @@ export default async function Page() {
 
       {/* Product Summary */}
       <div className="mb-6 rounded-xl border border-[#E7E2DC] bg-white p-5">
-        <p className="text-sm text-[#77736E]">
-          Total Products
-        </p>
+        <p className="text-sm text-[#77736E]">Total Products</p>
 
         <h2 className="mt-1 text-3xl font-bold text-[#111111]">
           {products.length.toString().padStart(2, "0")}
@@ -73,10 +65,7 @@ export default async function Page() {
       {products.length > 0 ? (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {products.map((product) => (
-            <ProductCard
-              key={product._id}
-              product={product}
-            />
+            <ProductCard key={product._id} product={product} />
           ))}
         </div>
       ) : (

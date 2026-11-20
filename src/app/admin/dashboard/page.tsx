@@ -1,28 +1,25 @@
-import Link from "next/link";
 import {
-  Wallet,
-  ShoppingBag,
-  Package,
-  Store,
-  TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight,
-  Plus,
   AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
   ChevronRight,
   Clock,
-  
+  Package,
+  Plus,
+  ShoppingBag,
+  Store,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
-
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-
-import { Badge } from "@/components/ui/badge";
 
 const stats = [
   {

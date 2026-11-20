@@ -1,21 +1,18 @@
-
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import {
-  Menu,
-  Search,
   Bell,
   ChevronDown,
-  UserRound,
-  Settings,
   LogOut,
+  Menu,
+  Search,
+  Settings,
+  UserRound,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,18 +21,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 
 interface AdminNavbarProps {
   onMenuClick?: () => void;
 }
 
-export default function AdminNavbar({
-  onMenuClick,
-}: AdminNavbarProps) {
+export default function AdminNavbar({ onMenuClick }: AdminNavbarProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#E7E2DC] bg-white">
       <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6">
-
         {/* Left Section */}
         <div className="flex items-center gap-3">
           <Button
@@ -81,7 +76,6 @@ export default function AdminNavbar({
 
         {/* Right Section */}
         <div className="flex items-center gap-2">
-
           {/* Notification */}
           <Button
             variant="ghost"
@@ -110,9 +104,7 @@ export default function AdminNavbar({
                   <p className="text-sm font-semibold text-[#111111]">
                     Admin User
                   </p>
-                  <p className="text-xs text-[#77736E]">
-                    Administrator
-                  </p>
+                  <p className="text-xs text-[#77736E]">Administrator</p>
                 </div>
 
                 <ChevronDown className="hidden h-4 w-4 text-[#77736E] sm:block" />
@@ -145,7 +137,6 @@ export default function AdminNavbar({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
         </div>
       </div>
     </header>

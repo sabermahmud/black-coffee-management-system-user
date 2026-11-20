@@ -1,30 +1,26 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Coffee,
+  Eye,
+  EyeOff,
+  Loader2,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  User,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-import {
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  User,
-  Building2,
-  ShieldCheck,
-  ArrowRight,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Coffee,
-  Sparkles,
-} from "lucide-react";
+import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
 import {
   Card,
   CardContent,
@@ -32,6 +28,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { signIn } from "@/lib/auth-client";
 

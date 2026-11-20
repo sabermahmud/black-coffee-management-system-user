@@ -1,23 +1,22 @@
-
 "use client";
 
+import {
+  Building2,
+  ChevronDown,
+  Coffee,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  ShoppingBag,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Menu,
-  X,
-  LogOut,
-  ChevronDown,
-  LayoutDashboard,
-  ShoppingBag,
-  Package,
-  Building2,
-  Coffee,
-} from "lucide-react";
+import { useState } from "react";
 
-import { useSession, signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 
 const navLinks = [
   { name: "Admin", href: "/admin", icon: LayoutDashboard },
@@ -65,10 +64,8 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#E7E2DC] bg-white/90 shadow-[0_2px_15px_rgba(0,0,0,0.03)] backdrop-blur-xl">
       <nav className="mx-auto flex h-[72px] max-w-[1600px] items-center justify-between px-4 sm:h-20 sm:px-6 lg:px-8">
-
         {/* Left: Mobile Menu + Navigation */}
         <div className="flex flex-1 items-center gap-5">
-
           {/* Mobile Menu Button */}
           <button
             type="button"
@@ -78,11 +75,7 @@ export default function Navbar() {
             aria-expanded={isMenuOpen}
             aria-controls="mobile-navigation"
           >
-            {isMenuOpen ? (
-              <X size={22} />
-            ) : (
-              <Menu size={22} />
-            )}
+            {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
           {/* Desktop Navigation */}
@@ -136,10 +129,8 @@ export default function Navbar() {
 
         {/* Right: Authentication */}
         <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
-
           {user ? (
             <div className="flex items-center gap-2 sm:gap-3">
-
               {/* Profile */}
               <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#E7E2DC] bg-[#FDFCFB] p-1.5 pr-2 sm:gap-3 sm:pr-3">
                 {userImage ? (
@@ -158,9 +149,7 @@ export default function Navbar() {
                   <p className="max-w-28 truncate text-sm font-semibold text-[#292929]">
                     {userName}
                   </p>
-                  <p className="text-[11px] text-[#999083]">
-                    Account
-                  </p>
+                  <p className="text-[11px] text-[#999083]">Account</p>
                 </div>
 
                 <ChevronDown
@@ -211,7 +200,6 @@ export default function Navbar() {
           className="border-t border-[#E7E2DC] bg-white/95 px-4 py-5 shadow-xl backdrop-blur-xl lg:hidden"
         >
           <div className="mx-auto max-w-7xl space-y-2">
-
             {/* Mobile User Info */}
             {user && (
               <div className="mb-4 flex items-center gap-3 rounded-2xl bg-[#F7F5F1] p-4">

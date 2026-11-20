@@ -1,4 +1,3 @@
-
 import type { Metadata } from "next";
 import { Manrope, Noto_Naskh_Arabic } from "next/font/google";
 import "./globals.css";

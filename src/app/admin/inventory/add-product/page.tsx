@@ -1,28 +1,25 @@
-
 "use client";
 
 import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-} from "react";
+  ArrowLeft,
+  Boxes,
+  ClipboardList,
+  ImagePlus,
+  PackagePlus,
+  Warehouse,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowLeft,
-  ImagePlus,
-  PackagePlus,
-  Boxes,
-  X,
-  ClipboardList,
-  Warehouse,
-} from "lucide-react";
-
+  type ChangeEvent,
+  type FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import swal from "sweetalert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -30,6 +27,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -37,7 +36,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import swal from "sweetalert";
 
 const inputStyles =
   "h-11 border-[#E7E2DC] bg-white focus-visible:border-[#79543A] focus-visible:ring-[#79543A]/20";
@@ -116,11 +114,7 @@ export default function AddProductPage() {
       const resData = await res.json();
 
       if (!res.ok) {
-        swal(
-          "Oops!",
-          resData.message || "Product creation failed",
-          "warning",
-        );
+        swal("Oops!", resData.message || "Product creation failed", "warning");
         return;
       }
 
@@ -134,18 +128,13 @@ export default function AddProductPage() {
     } catch (error) {
       console.error("Product submission error:", error);
 
-      swal(
-        "Error!",
-        "Something went wrong. Please try again.",
-        "error",
-      );
+      swal("Error!", "Something went wrong. Please try again.", "error");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#F7F5F1] p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-5xl space-y-7">
-
         {/* Header */}
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
           <div className="space-y-3">
@@ -178,7 +167,6 @@ export default function AddProductPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           {/* Product Information */}
           <Card className="gap-5 border border-[#E7E2DC] bg-white py-5 shadow-none">
             <CardHeader className="px-5">
@@ -226,7 +214,9 @@ export default function AddProductPage() {
                     <SelectItem value="dairy">Dairy Products</SelectItem>
                     <SelectItem value="bakery">Bakery & Snacks</SelectItem>
                     <SelectItem value="sweets">Sweets</SelectItem>
-                    <SelectItem value="packaging">Packaging Materials</SelectItem>
+                    <SelectItem value="packaging">
+                      Packaging Materials
+                    </SelectItem>
                     <SelectItem value="cups">Cups & Accessories</SelectItem>
                     <SelectItem value="others">Others</SelectItem>
                   </SelectContent>
@@ -273,9 +263,7 @@ export default function AddProductPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="piecePrice">
-                  Price per Piece (SAR)
-                </Label>
+                <Label htmlFor="piecePrice">Price per Piece (SAR)</Label>
 
                 <Input
                   id="piecePrice"
@@ -307,9 +295,7 @@ export default function AddProductPage() {
 
             <CardContent className="grid gap-5 px-5 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="packageQuantity">
-                  Quantity (Box / Packet)
-                </Label>
+                <Label htmlFor="packageQuantity">Quantity (Box / Packet)</Label>
 
                 <Input
                   id="packageQuantity"
@@ -364,7 +350,6 @@ export default function AddProductPage() {
 
             <CardContent className="px-5">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-
                 {/* Image Preview */}
                 <div className="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-[#E7E2DC] bg-[#F7F5F1] sm:w-48">
                   {imagePreview ? (
@@ -392,18 +377,14 @@ export default function AddProductPage() {
                         <ImagePlus size={28} />
                       </div>
 
-                      <span className="text-xs font-medium">
-                        Image Preview
-                      </span>
+                      <span className="text-xs font-medium">Image Preview</span>
                     </div>
                   )}
                 </div>
 
                 {/* Upload */}
                 <div className="flex-1 space-y-3">
-                  <Label htmlFor="productImage">
-                    Upload Product Image
-                  </Label>
+                  <Label htmlFor="productImage">Upload Product Image</Label>
 
                   <Input
                     ref={fileInputRef}

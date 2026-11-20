@@ -1,32 +1,31 @@
+
 "use client";
 
-import { useEffect, useState, type FormEvent, type ChangeEvent } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  Check,
+  CheckCircle2,
+  Coffee,
   Eye,
   EyeOff,
+  ImagePlus,
+  Loader2,
   LockKeyhole,
   Mail,
   Phone,
-  User,
-  Building2,
   ShieldCheck,
-  ArrowRight,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Coffee,
-  Check,
   Sparkles,
-  ImagePlus,
+  User,
   X,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { type ChangeEvent, type FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -34,6 +33,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { signUp } from "@/lib/auth-client";
 
@@ -402,9 +403,12 @@ export default function SignupPage() {
                   <div className="flex items-center gap-4">
                     <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[#D7CBB9] bg-[#FDFCFB]">
                       {imagePreview ? (
-                        <img
+                        <Image
                           src={imagePreview}
                           alt="Profile preview"
+                          width={80}
+                          height={80}
+                          unoptimized
                           className="h-full w-full object-cover"
                         />
                       ) : (
@@ -683,13 +687,10 @@ export default function SignupPage() {
 
                 {/* Success */}
                 {success && (
-                  <div
-                    role="status"
-                    className="flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700"
-                  >
+                  <output className="flex items-start gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
                     <span>{success}</span>
-                  </div>
+                  </output>
                 )}
 
                 {/* Submit */}

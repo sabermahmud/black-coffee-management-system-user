@@ -1,53 +1,38 @@
-
-import { NextResponse, type NextRequest } from "next/server";
-
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  // Public authentication routes
-  const isPublicRoute =
-    pathname === "/login" ||
-    pathname.startsWith("/login/") ||
-    pathname === "/signup" ||
-    pathname.startsWith("/signup/");
+  const isPublicRoute = pathname === "/login" || pathname === "/signup";
 
-  // Verify Better Auth session on the server
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
     });
 
-    // Not logged in
+    // User is not authenticated
     if (!session) {
-      // Allow login and signup pages
       if (isPublicRoute) {
         return NextResponse.next();
       }
 
-      // Redirect to login
       const loginUrl = new URL("/login", request.url);
 
-      loginUrl.searchParams.set(
-        "callbackUrl",
-        `${pathname}${search}`
-      );
+      loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
 
       return NextResponse.redirect(loginUrl);
     }
 
-    // Already logged in: redirect away from login/signup
+    // User is already authenticated
     if (isPublicRoute) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Authenticated user can continue
     return NextResponse.next();
   } catch (error) {
-    console.error("Authentication proxy error:", error);
+    console.error("Proxy authentication error:", error);
 
-    // Fail closed if session verification fails
     if (isPublicRoute) {
       return NextResponse.next();
     }

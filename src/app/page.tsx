@@ -38,9 +38,6 @@ import Image from "next/image";
 export default async function HomePage() {
   // const allProducts = await productsData();
   // console.log(allProducts)
-  return 
-    <>
-    
-    </>
-  
+  return;
+  <></>;
 }
