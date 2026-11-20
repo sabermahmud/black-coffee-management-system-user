@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ChangeEvent } from "react";
+import { useEffect, useState, type FormEvent, type ChangeEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,8 @@ import {
   Coffee,
   Check,
   Sparkles,
+  ImagePlus,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,23 +35,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-type UserRole = "management" | "branch_manager";
+import { signUp } from "@/lib/auth-client";
 
-const branches = [
-  { value: "branch-01", label: "Branch 01  (Branch Dawar Sa'ah)" },
-  { value: "branch-02", label: "Branch 02 (Branch Nazma)" },
-  { value: "branch-03", label: "Branch 03 (Branch Aqda)" },
-  { value: "branch-04", label: "Branch 04 (Branch Estetan)" },
-];
+type SignupFormData = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
+};
 
-const initialFormData = {
+const initialFormData: SignupFormData = {
   name: "",
   email: "",
   phone: "",
   password: "",
   confirmPassword: "",
-  role: "branch_manager" as UserRole,
-  branch: "",
 };
 
 const passwordRules = [
@@ -75,16 +76,33 @@ const passwordRules = [
   },
 ];
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
 export default function SignupPage() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState<SignupFormData>(initialFormData);
+
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Clean up image preview URL
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
+  // Password validation
   const passwordChecks = passwordRules.map((rule) => ({
     label: rule.label,
     valid: rule.test(formData.password),
@@ -94,21 +112,93 @@ export default function SignupPage() {
 
   const isPasswordValid = completedRules === passwordRules.length;
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  // Handle input changes
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "role" && value !== "branch_manager" ? { branch: "" } : {}),
     }));
 
     setError("");
     setSuccess("");
   };
 
+  // Handle profile image
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setError("");
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError("Image size must be less than 5MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  // Remove selected image
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview("");
+
+    const input = document.getElementById(
+      "profileImage",
+    ) as HTMLInputElement | null;
+
+    if (input) {
+      input.value = "";
+    }
+  };
+
+  // Upload image to Cloudinary
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      throw new Error(
+        "Cloudinary configuration is missing. Please check your environment variables.",
+      );
+    }
+
+    const uploadData = new FormData();
+
+    uploadData.append("file", file);
+    uploadData.append("upload_preset", uploadPreset);
+    uploadData.append("folder", "black-coffee/profiles");
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      {
+        method: "POST",
+        body: uploadData,
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || "Image upload failed.");
+    }
+
+    return data.secure_url;
+  };
+
+  // Handle signup
   const handleSignup = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -117,59 +207,48 @@ export default function SignupPage() {
     setError("");
     setSuccess("");
 
+    // Validate password
     if (!isPasswordValid) {
       setError("Please meet all password requirements.");
       return;
     }
 
+    // Validate password confirmation
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
-      return;
-    }
-
-    if (formData.role === "branch_manager" && !formData.branch) {
-      setError("Please select your assigned branch.");
       return;
     }
 
     try {
       setLoading(true);
 
-      const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+      // Upload profile image first
+      let imageUrl = "";
 
-      if (!serverUrl) {
-        throw new Error("Server configuration is missing.");
+      if (imageFile) {
+        imageUrl = await uploadToCloudinary(imageFile);
       }
 
-      const response = await fetch(`${serverUrl}/auth/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone.trim(),
-          password: formData.password,
-          requestedRole: formData.role,
-          branch: formData.role === "branch_manager" ? formData.branch : null,
-        }),
+      // Create account using Better Auth
+      const { error: signupError } = await signUp.email({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        password: formData.password,
+        image: imageUrl,
+        callbackURL: "/",
       });
 
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Registration failed. Please try again.",
-        );
+      if (signupError) {
+        setError(signupError.message || "Signup failed. Please try again.");
+        return;
       }
 
-      setSuccess(
-        data.message ||
-          "Registration submitted successfully! Awaiting approval.",
-      );
+      setSuccess("Account created successfully! Redirecting to login...");
 
       setFormData(initialFormData);
+      setImageFile(null);
+      setImagePreview("");
       setShowPassword(false);
       setShowConfirmPassword(false);
 
@@ -187,11 +266,12 @@ export default function SignupPage() {
     }
   };
 
+  // Features
   const features = [
     {
       icon: ShieldCheck,
       title: "Secure Access",
-      description: "Role-based permissions for every team member.",
+      description: "Secure access for every team member.",
     },
     {
       icon: Building2,
@@ -210,7 +290,6 @@ export default function SignupPage() {
       <div className="mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-[#E8E1D7] bg-white shadow-[0_25px_80px_-30px_rgba(65,47,25,0.18)] lg:grid-cols-2">
         {/* Branding Section */}
         <section className="relative flex flex-col justify-between overflow-hidden bg-[#F0EAE0] p-7 sm:p-10 lg:p-12">
-          {/* Decorative Background */}
           <div className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full border border-[#B78B52]/15" />
 
           <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full border border-[#B78B52]/15" />
@@ -218,7 +297,6 @@ export default function SignupPage() {
           <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-[#B78B52]/10 blur-3xl" />
 
           <div className="relative z-10">
-            {/* Logo */}
             <Link
               href="/"
               className="inline-flex items-center"
@@ -234,7 +312,6 @@ export default function SignupPage() {
               />
             </Link>
 
-            {/* Hero Content */}
             <div className="mt-16 lg:mt-24">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#B78B52]/25 bg-white/70 px-4 py-2">
                 <Sparkles className="h-4 w-4 text-[#98703F]" />
@@ -258,7 +335,6 @@ export default function SignupPage() {
               </p>
             </div>
 
-            {/* Brand Divider */}
             <div className="mt-10 flex items-center gap-3">
               <div className="h-px w-12 bg-[#B78B52]" />
               <Coffee className="h-4 w-4 text-[#98703F]" />
@@ -307,13 +383,71 @@ export default function SignupPage() {
               </CardTitle>
 
               <CardDescription className="mt-2 leading-6 text-[#898276]">
-                Enter your details to request access to the Black Coffee
-                management system.
+                Enter your details to create your Black Coffee management system
+                account.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="px-0">
               <form onSubmit={handleSignup} className="space-y-5">
+                {/* Profile Image */}
+                <div className="space-y-3">
+                  <Label htmlFor="profileImage" className="text-[#403B33]">
+                    Profile Image
+                    <span className="ml-1 text-xs text-[#A49A8C]">
+                      (Optional)
+                    </span>
+                  </Label>
+
+                  <div className="flex items-center gap-4">
+                    <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-[#D7CBB9] bg-[#FDFCFB]">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Profile preview"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-8 w-8 text-[#B4ADA3]" />
+                      )}
+
+                      {imagePreview && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-red-600"
+                          aria-label="Remove profile image"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <label
+                        htmlFor="profileImage"
+                        className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[#E8E1D7] bg-white px-4 text-sm font-medium text-[#403B33] transition hover:border-[#B78B52] hover:bg-[#FDFCFB]"
+                      >
+                        <ImagePlus className="h-4 w-4 text-[#98703F]" />
+                        Choose Image
+                      </label>
+
+                      <Input
+                        id="profileImage"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        disabled={loading}
+                        className="hidden"
+                      />
+
+                      <p className="mt-2 text-xs leading-5 text-[#999083]">
+                        JPG, PNG or WebP. Maximum 5MB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Full Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-[#403B33]">
@@ -331,6 +465,7 @@ export default function SignupPage() {
                       onChange={handleChange}
                       className="h-12 rounded-xl border-[#E8E1D7] bg-[#FDFCFB] pl-10 text-[#302B24] placeholder:text-[#B4ADA3] focus-visible:border-[#B78B52] focus-visible:ring-[#B78B52]/20"
                       autoComplete="name"
+                      disabled={loading}
                       required
                     />
                   </div>
@@ -355,6 +490,7 @@ export default function SignupPage() {
                         onChange={handleChange}
                         className="h-12 rounded-xl border-[#E8E1D7] bg-[#FDFCFB] pl-10 text-[#302B24] placeholder:text-[#B4ADA3] focus-visible:border-[#B78B52] focus-visible:ring-[#B78B52]/20"
                         autoComplete="email"
+                        disabled={loading}
                         required
                       />
                     </div>
@@ -380,65 +516,11 @@ export default function SignupPage() {
                         onChange={handleChange}
                         className="h-12 rounded-xl border-[#E8E1D7] bg-[#FDFCFB] pl-10 text-[#302B24] placeholder:text-[#B4ADA3] focus-visible:border-[#B78B52] focus-visible:ring-[#B78B52]/20"
                         autoComplete="tel"
+                        disabled={loading}
                       />
                     </div>
                   </div>
                 </div>
-
-                {/* Requested Role */}
-                <div className="space-y-2">
-                  <Label htmlFor="role" className="text-[#403B33]">
-                    Requested Role
-                  </Label>
-
-                  <select
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="h-12 w-full rounded-xl border border-[#E8E1D7] bg-[#FDFCFB] px-3 text-sm text-[#302B24] outline-none transition-colors focus:border-[#B78B52] focus:ring-2 focus:ring-[#B78B52]/20"
-                    required
-                  >
-                    <option value="branch_manager">Business Owner</option>
-
-                    <option value="management">Management Team</option>
-
-                    <option value="branch_manager">Branch Manager</option>
-
-                    <option value="branch_manager">Admin</option>
-                  </select>
-
-                  <p className="text-xs leading-5 text-[#999083]">
-                    Your requested role will be reviewed by an administrator
-                    before activation.
-                  </p>
-                </div>
-
-                {/* Branch */}
-                {formData.role === "branch_manager" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="branch" className="text-[#403B33]">
-                      Assigned Branch
-                    </Label>
-
-                    <select
-                      id="branch"
-                      name="branch"
-                      value={formData.branch}
-                      onChange={handleChange}
-                      className="h-12 w-full rounded-xl border border-[#E8E1D7] bg-[#FDFCFB] px-3 text-sm text-[#302B24] outline-none transition-colors focus:border-[#B78B52] focus:ring-2 focus:ring-[#B78B52]/20"
-                      required
-                    >
-                      <option value="">Select your branch</option>
-
-                      {branches.map((branch) => (
-                        <option key={branch.value} value={branch.value}>
-                          {branch.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
 
                 {/* Password */}
                 <div className="space-y-3">
@@ -458,6 +540,7 @@ export default function SignupPage() {
                       onChange={handleChange}
                       className="h-12 rounded-xl border-[#E8E1D7] bg-[#FDFCFB] pl-10 pr-12 text-[#302B24] placeholder:text-[#B4ADA3] focus-visible:border-[#B78B52] focus-visible:ring-[#B78B52]/20"
                       autoComplete="new-password"
+                      disabled={loading}
                       required
                     />
 
@@ -546,6 +629,7 @@ export default function SignupPage() {
                       onChange={handleChange}
                       className="h-12 rounded-xl border-[#E8E1D7] bg-[#FDFCFB] pl-10 pr-12 text-[#302B24] placeholder:text-[#B4ADA3] focus-visible:border-[#B78B52] focus-visible:ring-[#B78B52]/20"
                       autoComplete="new-password"
+                      disabled={loading}
                       required
                     />
 
