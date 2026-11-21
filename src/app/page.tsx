@@ -7,6 +7,7 @@ import ProductCarousel, {
 import Image from "next/image";
 import Banner from "@/components/header/Banner";
 
+
 const categoryNames: Record<string, string> = {
   coffee: "Coffee & Beans",
   beverages: "Beverages",
