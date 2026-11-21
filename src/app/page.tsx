@@ -4,6 +4,8 @@ import { ArrowRight, Coffee, Package, ShoppingBag, Boxes } from "lucide-react";
 import ProductCarousel, {
   type Product,
 } from "@/components/home/product-carousel";
+import Image from "next/image";
+import Banner from "@/components/header/Banner";
 
 const categoryNames: Record<string, string> = {
   coffee: "Coffee & Beans",
@@ -64,44 +66,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-[#F7F5F1] text-[#111111]">
       <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
         {/* Welcome Banner */}
-        <section className="relative overflow-hidden rounded-2xl bg-[#79543A] px-6 py-12 text-white sm:px-10 lg:py-16">
-          <div className="relative z-10 max-w-2xl">
-            <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-[#E7D8CC]">
-              Welcome to Black Coffee
-            </p>
-
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-              Manage Your Coffee Store Smarter.
-            </h1>
-
-            <p className="mt-4 max-w-xl text-sm leading-7 text-[#F1E8E1] sm:text-base">
-              Keep track of your products, stock and store inventory from one
-              simple management system.
-            </p>
-
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-[#79543A] transition hover:bg-[#F7F5F1]"
-              >
-                Explore Products
-                <ArrowRight size={17} />
-              </Link>
-
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Admin Dashboard
-              </Link>
-            </div>
-          </div>
-
-          <Coffee
-            className="absolute -right-8 -bottom-12 h-64 w-64 rotate-[-15deg] text-white/10 sm:right-8 sm:h-80 sm:w-80"
-            strokeWidth={1}
-          />
-        </section>
+        <Banner />
 
         {/* Store Overview */}
         <section>
