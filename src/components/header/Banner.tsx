@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function Banner() {
   return (
     <>
-      <section className="group relative isolate overflow-hidden rounded-3xl min-h-[420px] flex items-center bg-[#24160f] shadow-2xl">
+      <section className="group relative isolate overflow-hidden min-h-105 flex items-center bg-[#24160f] shadow-2xl">
         {/* Background Image */}
         <Image
           src="/blackStation.png"
@@ -16,10 +16,10 @@ export default function Banner() {
         />
 
         {/* Dark Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1c100b]/95 via-[#2b190f]/85 to-[#2b190f]/20" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#1c100b]/95 via-[#2b190f]/85 to-[#2b190f]/20" />
 
         {/* Additional Bottom Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-black/10" />
 
         {/* Content */}
         <div className="relative z-10 w-full px-7 py-14 sm:px-12 lg:px-16">
@@ -67,7 +67,7 @@ export default function Banner() {
        
 
         {/* Bottom Right Decoration */}
-        <div className="absolute bottom-0 right-0 h-1 w-1/3 rounded-full bg-gradient-to-l from-[#d9a77e]/70 to-transparent" />
+        <div className="absolute bottom-0 right-0 h-1 w-1/3 rounded-full bg-linear-to-l from-[#d9a77e]/70 to-transparent" />
       </section>
       ;
     </>

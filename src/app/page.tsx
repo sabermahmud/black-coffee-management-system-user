@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Coffee, Package, ShoppingBag, Boxes } from "lucide-react";
+import { ArrowRight, Coffee, Package, ShoppingBag, Boxes, Divide } from "lucide-react";
 
 import ProductCarousel, {
   type Product,
@@ -65,65 +65,22 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#F7F5F1] text-[#111111]">
-      <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-10 px-4 pb-4 sm:px-6 lg:px-8">
         {/* Welcome Banner */}
         <Banner />
 
-        {/* Store Overview */}
-        <section>
-          <div className="mb-5">
-            <h2 className="text-xl font-bold sm:text-2xl">Store Overview</h2>
-            <p className="mt-1 text-sm text-[#77736E]">
-              A quick look at your store inventory.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="flex items-center gap-4 rounded-xl border border-[#E7E2DC] bg-white p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F5F1] text-[#79543A]">
-                <ShoppingBag size={24} />
-              </div>
-
-              <div>
-                <p className="text-sm text-[#77736E]">Total Products</p>
-                <p className="text-2xl font-bold">{totalProducts}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 rounded-xl border border-[#E7E2DC] bg-white p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F5F1] text-[#79543A]">
-                <Boxes size={24} />
-              </div>
-
-              <div>
-                <p className="text-sm text-[#77736E]">Total Categories</p>
-                <p className="text-2xl font-bold">{categories.length}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4 rounded-xl border border-[#E7E2DC] bg-white p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#F7F5F1] text-[#79543A]">
-                <Package size={24} />
-              </div>
-
-              <div>
-                <p className="text-sm text-[#77736E]">Total Packages</p>
-                <p className="text-2xl font-bold">{totalStock}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Product Categories */}
         <section className="space-y-8">
-          <div>
-            <h2 className="text-xl font-bold sm:text-2xl">
-              Explore Our Products
+          <div className="text-center">
+            <h2 className="text-xl font-bold sm:text-4xl">
+              Explore Products In Store
             </h2>
             <p className="mt-1 text-sm text-[#77736E]">
               Browse products by category.
             </p>
           </div>
+
+          <hr/>
 
           {categories.length > 0 ? (
             categories.map((category) => {
