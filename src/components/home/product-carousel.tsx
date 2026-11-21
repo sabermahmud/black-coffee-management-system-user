@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
-import { ChevronLeft, ChevronRight, Package, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Package, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Button } from "@base-ui/react";
 
 export interface Product {
   _id: string;
@@ -113,6 +114,17 @@ function ProductCard({ product }: { product: Product }) {
         </div>
 
         <p className="text-xs text-[#77736E]">Total pieces: {totalPieces}</p>
+      </div>
+      <div>
+        {/* Order Button */}
+        <Button
+          type="button"
+          className="flex items-center justify-center gap-2 mt-5 h-11 w-full bg-[#79543A] font-semibold text-white transition-colors hover:bg-[#5F402D]"
+        >
+          <ShoppingCart size={17} />
+          Add To Order List
+        </Button>
+        {/*  */}
       </div>
     </article>
   );

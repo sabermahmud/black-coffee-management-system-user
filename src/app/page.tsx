@@ -1,12 +1,18 @@
 import Link from "next/link";
-import { ArrowRight, Coffee, Package, ShoppingBag, Boxes, Divide } from "lucide-react";
+import {
+  ArrowRight,
+  Coffee,
+  Package,
+  ShoppingBag,
+  Boxes,
+  Divide,
+} from "lucide-react";
 
 import ProductCarousel, {
   type Product,
 } from "@/components/home/product-carousel";
 import Image from "next/image";
 import Banner from "@/components/header/Banner";
-
 
 const categoryNames: Record<string, string> = {
   coffee: "Coffee & Beans",
@@ -65,10 +71,9 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-[#F7F5F1] text-[#111111]">
+      {/* Welcome Banner */}
+      <Banner />
       <div className="mx-auto max-w-7xl space-y-10 px-4 pb-4 sm:px-6 lg:px-8">
-        {/* Welcome Banner */}
-        <Banner />
-
         {/* Product Categories */}
         <section className="space-y-8">
           <div className="text-center">
@@ -80,7 +85,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <hr/>
+          <hr />
 
           {categories.length > 0 ? (
             categories.map((category) => {

@@ -148,7 +148,7 @@ export default function ProductCard({ product }: { product: Product }) {
           className="mt-5 h-11 w-full gap-2 bg-[#79543A] font-semibold text-white transition-colors hover:bg-[#5F402D]"
         >
           <ShoppingCart size={17} />
-          Order Now
+          Add To Order List
         </Button>
 
         {/* Footer */}
